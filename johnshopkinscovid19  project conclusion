@@ -1,0 +1,216 @@
+Project Conclusion :
+This analysis of COVID-19 data provides valuable insights into the past trends and future forecast of confirmed, recovered, and death cases. Using historical data, we analyzed general trends in COVID-19 cases and developed models to forecast cases for the upcoming month. Here’s a summary of the key findings and insights from each task.
+
+TASK 1 : DATA ANALYSIS REPORT
+1. Initial Data Overview
+We started with three datasets (confirmed cases, recoveries, and deaths), each tracking daily COVID-19 counts globally. Our focus was on simplifying this data to make it manageable for analysis.
+First, we reshaped these datasets from wide to long format, organizing them by date and then summed up each day’s global total to create a single time series for confirmed, recovered, and death cases.
+2. Data Preparation
+Dropped Columns: We eliminated irrelevant columns (province/state, latitude, longitude, and country) to focus on the key data for univariate analysis.
+
+Aggregated Data: The data was aggregated by date to create a unified time series for each dataset.
+
+No Null Values or Outliers: A thorough check confirmed that there were no null values or outliers in any of the datasets.
+
+Scaling: We applied Min-Max scaling to normalize the data, making it suitable for modeling.
+
+3. Stationarity
+Stationarity Check: We performed an autocorrelation function (ACF) plot analysis, revealing that the data exhibited non-stationarity due to a clear upward trend.
+
+Differencing: To stabilize the data, we applied first and second differencing, ensuring the series became stationary for effective forecasting.
+
+4. Model Creation
+Using the ARIMA model, we initially fit the data with starting parameters and evaluated the AIC scores. After optimizing the parameters through grid search, we obtained improved AIC scores, confirming the model's reliability for future predictions.
+The optimal parameters were found:
+
+Confirmed: p = 3, d = 2, q = 4
+Recovered: p = 1, d = 2, q = 4
+Deaths: p = 4, d = 2, q = 1
+5. Model Evaluation
+Confirmed Cases: MSE: 0.00024, RMSE: 0.0155, MAE: 0.0125
+
+Recovered Cases: MSE: 0.00089, RMSE: 0.0298, MAE: 0.0254
+
+Death Cases: MSE: 0.00044, RMSE: 0.02114, MAE: 0.01952
+
+The low values of Mean Squared Error (MSE) and Root Mean Squared Error (RMSE) across all datasets indicate that our models have successfully captured the underlying patterns in the data and provide reliable forecasts. The Mean Absolute Error (MAE) further supports this by showing that the average magnitude of the prediction errors is minimal, reinforcing the accuracy of our models.
+These metrics suggest that we can confidently use our ARIMA models to predict future COVID-19 cases, recoveries, and deaths, enabling informed decision-making for health authorities.
+
+​
+​
+​
+​
+​
+TASK 2 : Predictive Modeling for Covid 19 Cases
+Confirmed
+confirmed_historical = ARIMA(confirmed_long_scaled_df['Confirmed'], order=(3,2,4)).fit()
+future_steps = 30
+c_future_dates = pd.date_range(start = (confirmed_long_scaled_df.index[-1]) + pd.DateOffset(days =1), periods = future_steps, freq ='D')
+c_future_dates
+DatetimeIndex(['2020-09-22', '2020-09-23', '2020-09-24', '2020-09-25',
+               '2020-09-26', '2020-09-27', '2020-09-28', '2020-09-29',
+               '2020-09-30', '2020-10-01', '2020-10-02', '2020-10-03',
+               '2020-10-04', '2020-10-05', '2020-10-06', '2020-10-07',
+               '2020-10-08', '2020-10-09', '2020-10-10', '2020-10-11',
+               '2020-10-12', '2020-10-13', '2020-10-14', '2020-10-15',
+               '2020-10-16', '2020-10-17', '2020-10-18', '2020-10-19',
+               '2020-10-20', '2020-10-21'],
+              dtype='datetime64[ns]', freq='D')
+c_forecast_values = confirmed_historical.forecast(steps =future_steps)
+c_inverse_forecast = scaler.inverse_transform(np.array(c_forecast_values).reshape(-1,1))
+c_forecast_df = pd.DataFrame({'Date':c_future_dates, 'Confirmed_Forecasted_Cases' : c_inverse_forecast.flatten()})
+pd.set_option('display.float_format', lambda x: '%.0f' % x)
+​
+c_forecast_df
+​
+Date	Confirmed_Forecasted_Cases
+0	2020-09-22	971949
+1	2020-09-23	981004
+2	2020-09-24	990005
+3	2020-09-25	998116
+4	2020-09-26	1005478
+5	2020-09-27	1012724
+6	2020-09-28	1020429
+7	2020-09-29	1028670
+8	2020-09-30	1037104
+9	2020-10-01	1045328
+10	2020-10-02	1053200
+11	2020-10-03	1060877
+12	2020-10-04	1068626
+13	2020-10-05	1076591
+14	2020-10-06	1084716
+15	2020-10-07	1092840
+16	2020-10-08	1100843
+17	2020-10-09	1108726
+18	2020-10-10	1116581
+19	2020-10-11	1124497
+20	2020-10-12	1132495
+21	2020-10-13	1140529
+22	2020-10-14	1148538
+23	2020-10-15	1156493
+24	2020-10-16	1164416
+25	2020-10-17	1172346
+26	2020-10-18	1180306
+27	2020-10-19	1188293
+28	2020-10-20	1196282
+29	2020-10-21	1204255
+plt.figure(figsize=(12,6))
+sns.lineplot(x = confirmed_long_scaled_df.index, y = confirmed_long_scaled_df['Confirmed'], label = 'Historical')
+sns.lineplot(x = c_future_dates, y = c_forecast_values, label ='Forecast')
+plt.title('Confirmed Cases with Forecast')
+plt.xlabel('Date')
+plt.ylabel('Cases')
+plt.show()
+
+​
+​
+​
+​
+​
+​
+​
+Recovered
+recovered_historical = ARIMA(recovered_long_scaled_df['Recovered'], order=(1,2,4)).fit()
+r_future_dates = pd.date_range(start = (recovered_long_scaled_df.index[-1]) + pd.DateOffset(days =1), periods = future_steps, freq ='D')
+r_forecast_values = recovered_historical.forecast(steps =future_steps)
+r_inverse_forecast = scaler.inverse_transform(np.array(r_forecast_values).reshape(-1,1))
+r_forecast_df = pd.DataFrame({'Date':r_future_dates, 'Recovered_Forecasted_Cases' : r_inverse_forecast.flatten()})
+​
+r_forecast_df
+​
+Date	Recovered_Forecasted_Cases
+0	2020-09-22	973817
+1	2020-09-23	983200
+2	2020-09-24	992606
+3	2020-09-25	1002140
+4	2020-09-26	1011727
+5	2020-09-27	1021335
+6	2020-09-28	1030952
+7	2020-09-29	1040572
+8	2020-09-30	1050195
+9	2020-10-01	1059817
+10	2020-10-02	1069440
+11	2020-10-03	1079063
+12	2020-10-04	1088686
+13	2020-10-05	1098310
+14	2020-10-06	1107933
+15	2020-10-07	1117556
+16	2020-10-08	1127179
+17	2020-10-09	1136802
+18	2020-10-10	1146425
+19	2020-10-11	1156048
+20	2020-10-12	1165672
+21	2020-10-13	1175295
+22	2020-10-14	1184918
+23	2020-10-15	1194541
+24	2020-10-16	1204164
+25	2020-10-17	1213787
+26	2020-10-18	1223410
+27	2020-10-19	1233034
+28	2020-10-20	1242657
+29	2020-10-21	1252280
+​
+plt.figure(figsize=(12,6))
+sns.lineplot(x = recovered_long_scaled_df.index, y = recovered_long_scaled_df['Recovered'], label = 'Historical')
+sns.lineplot(x = r_future_dates, y = r_forecast_values, label ='Forecast')
+plt.title('Recovered Cases with Forecast')
+plt.xlabel('Date')
+plt.ylabel('Cases')
+plt.show()
+
+Deaths
+deaths_historical = ARIMA(recovered_long_scaled_df['Recovered'], order=(4,2,1)).fit()
+d_future_dates = pd.date_range(start = (deaths_long_scaled_df.index[-1]) + pd.DateOffset(days =1), periods = future_steps, freq ='D')
+d_forecast_values = deaths_historical.forecast(steps =future_steps)
+d_forecast_inverse = scaler.inverse_transform(np.array(d_forecast_values).reshape(-1,1))
+d_forecast_df = pd.DataFrame({'Date':d_future_dates, 'Death_Forecasted_Cases' : d_forecast_inverse.flatten()})
+d_forecast_df
+Date	Death_Forecasted_Cases
+0	2020-09-22	973286
+1	2020-09-23	982690
+2	2020-09-24	992355
+3	2020-09-25	1002266
+4	2020-09-26	1011456
+5	2020-09-27	1020829
+6	2020-09-28	1030170
+7	2020-09-29	1039563
+8	2020-09-30	1049056
+9	2020-10-01	1058478
+10	2020-10-02	1067904
+11	2020-10-03	1077313
+12	2020-10-04	1086719
+13	2020-10-05	1096142
+14	2020-10-06	1105563
+15	2020-10-07	1114985
+16	2020-10-08	1124405
+17	2020-10-09	1133822
+18	2020-10-10	1143241
+19	2020-10-11	1152660
+20	2020-10-12	1162079
+21	2020-10-13	1171498
+22	2020-10-14	1180917
+23	2020-10-15	1190337
+24	2020-10-16	1199756
+25	2020-10-17	1209175
+26	2020-10-18	1218594
+27	2020-10-19	1228013
+28	2020-10-20	1237432
+29	2020-10-21	1246851
+plt.figure(figsize=(12,6))
+sns.lineplot(x = deaths_long_scaled_df.index, y = deaths_long_scaled_df['Deaths'], label = 'Historical')
+sns.lineplot(x = d_future_dates, y = d_forecast_values, label ='Forecast')
+plt.title('Death Cases with Forecast')
+plt.xlabel('Date')
+plt.ylabel('Cases')
+plt.show()
+​
+<Axes: xlabel='Date', ylabel='Deaths'>
+
+TASK 3 : Government Health Department Recommendations
+Based on our forecast, the model suggests that COVID-19 cases will increase in the coming month. Although the analysis doesn’t distinguish by country, these global trends are relevant to any region experiencing similar rates of case increase. We recommend that health departments focus on:
+
+Resource Planning: With a likely increase in cases, ensure sufficient hospital beds, medical supplies, and healthcare personnel.
+Public Awareness Campaigns: Encourage preventive measures such as vaccination, social distancing, and mask-wearing to reduce transmission rates.
+Monitoring and Rapid Response: Develop infrastructure for early detection and quick response to new cases to control outbreaks efficiently.
+By preparing resources and educating the public, governments can mitigate the impact of the predicted increase in cases.
+
