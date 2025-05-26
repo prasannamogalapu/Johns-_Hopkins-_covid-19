@@ -1,7 +1,7 @@
 # Johns-_Hopkins-_covid-19
 This project analyzes global COVID-19 trends using the publicly available dataset provided by the Johns Hopkins University Center for Systems Science and Engineering (JHU CSSE).
 
-🔍 Overview
+#Overview
 The objective of this project is to explore, clean, and analyze global COVID-19 data to uncover meaningful insights and visualize the spread of the virus over time. The dataset includes daily reports of confirmed cases, recoveries, and deaths across various countries and regions.
 
 Key highlights of the project:
